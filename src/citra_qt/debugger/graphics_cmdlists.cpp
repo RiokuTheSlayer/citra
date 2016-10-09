@@ -226,13 +226,13 @@ GPUCommandListWidget::GPUCommandListWidget(QWidget* parent)
 
     QVBoxLayout* main_layout = new QVBoxLayout;
     main_layout->addWidget(list_widget);
+	main_layout->addWidget(search_bar);
     {
         QHBoxLayout* sub_layout = new QHBoxLayout;
         sub_layout->addWidget(toggle_tracing);
         sub_layout->addWidget(copy_all);
         main_layout->addLayout(sub_layout);
     }
-    main_layout->addWidget(search_bar);
     main_widget->setLayout(main_layout);
 
     setWidget(main_widget);
