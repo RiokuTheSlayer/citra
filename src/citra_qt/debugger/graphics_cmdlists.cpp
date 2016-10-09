@@ -52,7 +52,9 @@ public:
 GPUCommandListModel::GPUCommandListModel(QObject* parent) : QAbstractListModel(parent) {}
 
 int GPUCommandListModel::rowCount(const QModelIndex& parent) const {
-    return static_cast<int>((pica_trace.is_search_corrected ? pica_trace.search_corrected_writes : pica_trace.writes).size());
+    return static_cast<int>(
+        (pica_trace.is_search_corrected ? pica_trace.search_corrected_writes : pica_trace.writes)
+            .size());
 }
 
 int GPUCommandListModel::columnCount(const QModelIndex& parent) const {
@@ -63,7 +65,9 @@ QVariant GPUCommandListModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
 
-    const auto& write = (pica_trace.is_search_corrected ? pica_trace.search_corrected_writes[index.row()] : pica_trace.writes[index.row()]);
+    const auto& write =
+        (pica_trace.is_search_corrected ? pica_trace.search_corrected_writes[index.row()]
+                                        : pica_trace.writes[index.row()]);
 
     if (role == Qt::DisplayRole) {
         QString content;
@@ -210,8 +214,8 @@ GPUCommandListWidget::GPUCommandListWidget(QWidget* parent)
     connect(list_widget, SIGNAL(doubleClicked(const QModelIndex&)), this,
             SLOT(OnCommandDoubleClicked(const QModelIndex&)));
 
-    connect(search_bar, SIGNAL(textChanged(const QString &)), model,
-            SLOT(UpdatePicaTrace(const QString &)));
+    connect(search_bar, SIGNAL(textChanged(const QString&)), model,
+            SLOT(UpdatePicaTrace(const QString&)));
 
     toggle_tracing = new QPushButton(tr("Start Tracing"));
     QPushButton* copy_all = new QPushButton(tr("Copy All"));
@@ -226,7 +230,7 @@ GPUCommandListWidget::GPUCommandListWidget(QWidget* parent)
 
     QVBoxLayout* main_layout = new QVBoxLayout;
     main_layout->addWidget(list_widget);
-	main_layout->addWidget(search_bar);
+    main_layout->addWidget(search_bar);
     {
         QHBoxLayout* sub_layout = new QHBoxLayout;
         sub_layout->addWidget(toggle_tracing);
