@@ -7,13 +7,13 @@
 #include <QComboBox>
 #include <QHeaderView>
 #include <QLabel>
+#include <QLineEdit>
 #include <QListView>
 #include <QMainWindow>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QTreeView>
 #include <QVBoxLayout>
-#include <QLineEdit>
 #include "citra_qt/debugger/graphics_cmdlists.h"
 #include "citra_qt/util/spinbox.h"
 #include "citra_qt/util/util.h"
@@ -21,8 +21,6 @@
 #include "video_core/debug_utils/debug_utils.h"
 #include "video_core/pica.h"
 #include "video_core/pica_state.h"
-#include <iostream>
-using namespace std;
 
 QImage LoadTexture(u8* src, const Pica::DebugUtils::TextureInfo& info) {
     QImage decoded_image(info.width, info.height, QImage::Format_ARGB32);
@@ -54,7 +52,7 @@ public:
 GPUCommandListModel::GPUCommandListModel(QObject* parent) : QAbstractListModel(parent) {}
 
 int GPUCommandListModel::rowCount(const QModelIndex& parent) const {
-    return static_cast<int>((pica_trace.isSearchCorrected ? pica_trace.search_corrected_writes : pica_trace.writes).size());
+    return static_cast<int>((pica_trace.is_search_corrected ? pica_trace.search_corrected_writes : pica_trace.writes).size());
 }
 
 int GPUCommandListModel::columnCount(const QModelIndex& parent) const {
@@ -65,7 +63,7 @@ QVariant GPUCommandListModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
 
-	const auto& write = (pica_trace.isSearchCorrected ? pica_trace.search_corrected_writes[index.row()] : pica_trace.writes[index.row()]);
+    const auto& write = (pica_trace.is_search_corrected ? pica_trace.search_corrected_writes[index.row()] : pica_trace.writes[index.row()]);
 
     if (role == Qt::DisplayRole) {
         QString content;
@@ -116,13 +114,10 @@ void GPUCommandListModel::OnPicaTraceFinished(const Pica::DebugUtils::PicaTrace&
 }
 
 void GPUCommandListModel::UpdatePicaTrace(const QString& str) {
+    pica_trace.CorrectSearchWrites(str.toStdString());
 
-	pica_trace.CorrectSearchWrites(str.toStdString());
-	cout << "Updated writes";
-
-	beginResetModel();
-
-	endResetModel();
+    beginResetModel();
+    endResetModel();
 }
 
 #define COMMAND_IN_RANGE(cmd_id, reg_name)                                                         \
@@ -200,6 +195,9 @@ GPUCommandListWidget::GPUCommandListWidget(QWidget* parent)
     list_widget->setRootIsDecorated(false);
     list_widget->setUniformRowHeights(true);
 
+    search_bar = new QLineEdit();
+    search_bar->setPlaceholderText("Search Bar");
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     list_widget->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 #else
@@ -211,6 +209,9 @@ GPUCommandListWidget::GPUCommandListWidget(QWidget* parent)
             SLOT(SetCommandInfo(const QModelIndex&)));
     connect(list_widget, SIGNAL(doubleClicked(const QModelIndex&)), this,
             SLOT(OnCommandDoubleClicked(const QModelIndex&)));
+
+    connect(search_bar, SIGNAL(textChanged(const QString &)), model, 
+            SLOT(UpdatePicaTrace(const QString &)));
 
     toggle_tracing = new QPushButton(tr("Start Tracing"));
     QPushButton* copy_all = new QPushButton(tr("Copy All"));
@@ -231,14 +232,8 @@ GPUCommandListWidget::GPUCommandListWidget(QWidget* parent)
         sub_layout->addWidget(copy_all);
         main_layout->addLayout(sub_layout);
     }
-
-	search_bar = new QLineEdit();
-	search_bar->setPlaceholderText("Search Bar");
-	main_layout->addWidget(search_bar);
-
-	connect(search_bar, SIGNAL(textChanged(const QString &)), model, SLOT(UpdatePicaTrace(const QString &)));
-
-	main_widget->setLayout(main_layout);
+    main_layout->addWidget(search_bar);
+    main_widget->setLayout(main_layout);
 
     setWidget(main_widget);
 }

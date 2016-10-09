@@ -27,10 +27,10 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role = Qt::DisplayRole) const override;
-	
+    
 public slots:
     void OnPicaTraceFinished(const Pica::DebugUtils::PicaTrace& trace);
-	void UpdatePicaTrace(const QString &);
+    void UpdatePicaTrace(const QString &);
 
 private:
     Pica::DebugUtils::PicaTrace pica_trace;
@@ -41,15 +41,13 @@ class GPUCommandListWidget : public QDockWidget {
 
 public:
     GPUCommandListWidget(QWidget* parent = nullptr);
-
-	QLineEdit* search_bar;
+    QLineEdit* search_bar;
 
 public slots:
     void OnToggleTracing();
     void OnCommandDoubleClicked(const QModelIndex&);
     void SetCommandInfo(const QModelIndex&);
-
-	void CopyAllToClipboard();
+    void CopyAllToClipboard();
 
 signals:
     void TracingFinished(const Pica::DebugUtils::PicaTrace&);
