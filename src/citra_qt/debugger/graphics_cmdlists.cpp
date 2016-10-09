@@ -210,7 +210,7 @@ GPUCommandListWidget::GPUCommandListWidget(QWidget* parent)
     connect(list_widget, SIGNAL(doubleClicked(const QModelIndex&)), this,
             SLOT(OnCommandDoubleClicked(const QModelIndex&)));
 
-    connect(search_bar, SIGNAL(textChanged(const QString &)), model, 
+    connect(search_bar, SIGNAL(textChanged(const QString &)), model,
             SLOT(UpdatePicaTrace(const QString &)));
 
     toggle_tracing = new QPushButton(tr("Start Tracing"));
